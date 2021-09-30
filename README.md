@@ -22,14 +22,13 @@ We also propose an attention variant RCDA to reduce the memory cost for high-res
 | SMCA               |  multi-level  |  50     |  43.7   |  152     | 10                |
 | Deformable DETR    |  multi-level  |  50     |  43.8   |  173     | 15                |
 | Conditional DETR   |  DC5          |  50     |  43.8   |  195     | 10                |
-| Anchor DETR        |  DC5          |  50     |  44.2   |  151     | 16                |
+| Anchor DETR        |  DC5          |  50     |  44.2   |  151     | 16 (19)           |
 
 
 *Note:*
 1. The results are based on ResNet-50 backbone.
 2. Inference speeds are measured on NVIDIA Tesla V100 GPU.
-3. DETR gets 12 FPS with torchscript optimization and 10 FPS without it.
-The others do not enable the torchscript.
+3. The values in parentheses of the Infer Speed indicate the speed with torchscript optimization.
 
 
 ## Model
