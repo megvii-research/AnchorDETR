@@ -13,7 +13,8 @@ AnchorDETR model and criterion classes.
 import torch
 import torch.nn.functional as F
 from torch import nn
-
+from typing import Optional, List
+from torch import Tensor
 from util import box_ops
 from util.misc import (NestedTensor, nested_tensor_from_tensor_list,
                        accuracy, get_world_size, interpolate,
@@ -30,7 +31,7 @@ import copy
 class AnchorDETR(nn.Module):
     """ This is the AnchorDETR module that performs object detection """
 
-    def __init__(self, backbone, transformer,  num_feature_levels, aux_loss=True):
+    def __init__(self, backbone, transformer, aux_loss=True):
         """ Initializes the model.
         Parameters:
             backbone: torch module of the backbone to be used. See backbone.py
@@ -42,29 +43,11 @@ class AnchorDETR(nn.Module):
         self.transformer = transformer
         hidden_dim = transformer.d_model
 
-        self.num_feature_levels = num_feature_levels
-        if num_feature_levels > 1:
-            num_backbone_outs = len(backbone.strides)
-            input_proj_list = []
-            for _ in range(num_backbone_outs):
-                in_channels = backbone.num_channels[_]
-                if _ == 0:
-                    input_proj_list.append(nn.Sequential(
-                        nn.Conv2d(in_channels, hidden_dim, kernel_size=3, stride=2, padding=1),
-                        nn.GroupNorm(32, hidden_dim),
-                    ))
-                else:
-                    input_proj_list.append(nn.Sequential(
-                        nn.Conv2d(in_channels, hidden_dim, kernel_size=1),
-                        nn.GroupNorm(32, hidden_dim),
-                    ))
-            self.input_proj = nn.ModuleList(input_proj_list)
-        else:
-            self.input_proj = nn.ModuleList([
-                nn.Sequential(
-                    nn.Conv2d(backbone.num_channels[0], hidden_dim, kernel_size=1),
-                    nn.GroupNorm(32, hidden_dim),
-                )])
+        self.input_proj = nn.ModuleList([
+            nn.Sequential(
+                nn.Conv2d(backbone.num_channels[0], hidden_dim, kernel_size=1),
+                nn.GroupNorm(32, hidden_dim),
+            )])
         self.backbone = backbone
         self.aux_loss = aux_loss
 
@@ -92,12 +75,12 @@ class AnchorDETR(nn.Module):
         features = self.backbone(samples)
 
         srcs = []
-        masks = []
-        for l, feat in enumerate(features):
-            src, mask = feat.decompose()
-            srcs.append(self.input_proj[l](src).unsqueeze(1))
-            masks.append(mask)
-            assert mask is not None
+        masks :List[Tensor]= []
+
+        src, mask = features[-1].decompose()
+        srcs.append(self.input_proj[-1](src).unsqueeze(1))
+        masks.append(mask)
+        assert mask is not None
 
         srcs = torch.cat(srcs, dim=1)
 
@@ -363,7 +346,6 @@ def build(args):
     model = AnchorDETR(
         backbone,
         transformer,
-        num_feature_levels=args.num_feature_levels,
         aux_loss=args.aux_loss
     )
     if args.masks:

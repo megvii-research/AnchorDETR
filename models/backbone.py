@@ -81,7 +81,7 @@ class BackboneBase(nn.Module):
 
     def forward(self, tensor_list: NestedTensor):
         xs = self.body(tensor_list.tensors)
-        out = []
+        out : List[NestedTensor] = []
         for name, x in xs.items():
             m = tensor_list.mask
             assert m is not None
@@ -108,6 +108,6 @@ class Backbone(BackboneBase):
 
 def build_backbone(args):
     train_backbone = args.lr_backbone > 0
-    return_interm_layers = args.masks or (args.num_feature_levels > 1)
+    return_interm_layers = args.masks
     backbone = Backbone(args.backbone, train_backbone, return_interm_layers, args.dilation)
     return backbone

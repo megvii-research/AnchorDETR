@@ -337,12 +337,13 @@ def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
 
 
 class NestedTensor(object):
-    def __init__(self, tensors, mask: Optional[Tensor]):
+    def __init__(self, tensors, mask):
         self.tensors = tensors
         self.mask = mask
 
+    @torch.jit.unused
     def to(self, device, non_blocking=False):
-        # type: (Device) -> NestedTensor # noqa
+        # type: (Device, bool) -> NestedTensor # noqa
         cast_tensor = self.tensors.to(device, non_blocking=non_blocking)
         mask = self.mask
         if mask is not None:
@@ -352,6 +353,7 @@ class NestedTensor(object):
             cast_mask = None
         return NestedTensor(cast_tensor, cast_mask)
 
+    @torch.jit.unused
     def record_stream(self, *args, **kwargs):
         self.tensors.record_stream(*args, **kwargs)
         if self.mask is not None:
@@ -510,7 +512,7 @@ def get_total_grad_norm(parameters, norm_type=2):
                             norm_type)
     return total_norm
 
-def inverse_sigmoid(x, eps=1e-5):
+def inverse_sigmoid(x, eps:float=1e-5):
     x = x.clamp(min=0, max=1)
     x1 = x.clamp(min=eps)
     x2 = (1 - x).clamp(min=eps)

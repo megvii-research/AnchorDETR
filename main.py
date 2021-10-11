@@ -52,7 +52,7 @@ def get_args_parser():
                         help="Name of the convolutional backbone to use")
     parser.add_argument('--dilation', default=True,
                         help="If true, we replace stride with dilation in the last convolutional block (DC5)")
-    parser.add_argument('--num_feature_levels', default=1, type=int, help='number of feature levels')
+
     # * Transformer
     parser.add_argument('--enc_layers', default=6, type=int,
                         help="Number of encoding layers in the transformer")
@@ -72,11 +72,7 @@ def get_args_parser():
                         help="Number of query patterns")
     parser.add_argument('--spatial_prior', default='learned', choices=['learned', 'grid'],
                         type=str,help="Number of query patterns")
-    parser.add_argument('--attention_type',
-                        # default='nn.MultiheadAttention',
-                        default="RCDA",
-                        choices=['RCDA', 'nn.MultiheadAttention'],
-                        type=str,help="Type of attention module")
+
     # * Segmentation
     parser.add_argument('--masks', action='store_true',
                         help="Train segmentation head if the flag is provided")
