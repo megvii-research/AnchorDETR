@@ -30,15 +30,13 @@ import copy
 class AnchorDETR(nn.Module):
     """ This is the AnchorDETR module that performs object detection """
 
-    def __init__(self, backbone, transformer,  num_feature_levels,
-                 aux_loss=True, with_box_refine=False):
+    def __init__(self, backbone, transformer,  num_feature_levels, aux_loss=True):
         """ Initializes the model.
         Parameters:
             backbone: torch module of the backbone to be used. See backbone.py
             transformer: torch module of the transformer architecture. See transformer.py
             num_classes: number of object classes
             aux_loss: True if auxiliary decoding losses (loss at each decoder layer) are to be used.
-            with_box_refine: iterative bounding box refinement
         """
         super().__init__()
         self.transformer = transformer
@@ -69,7 +67,6 @@ class AnchorDETR(nn.Module):
                 )])
         self.backbone = backbone
         self.aux_loss = aux_loss
-        self.with_box_refine = with_box_refine
 
         for proj in self.input_proj:
             nn.init.xavier_uniform_(proj[0].weight, gain=1)
@@ -367,8 +364,7 @@ def build(args):
         backbone,
         transformer,
         num_feature_levels=args.num_feature_levels,
-        aux_loss=args.aux_loss,
-        with_box_refine=args.with_box_refine
+        aux_loss=args.aux_loss
     )
     if args.masks:
         model = DETRsegm(model, freeze_detr=(args.frozen_weights is not None))

@@ -52,7 +52,8 @@ class Transformer(nn.Module):
 
         self.spatial_prior=spatial_prior
 
-        self.level_embed = nn.Embedding(num_feature_levels, d_model)
+        if num_feature_levels>1:
+            self.level_embed = nn.Embedding(num_feature_levels, d_model)
         self.num_pattern = num_query_pattern
         self.pattern = nn.Embedding(self.num_pattern, d_model)
 
@@ -77,8 +78,6 @@ class Transformer(nn.Module):
         self.class_embed = nn.Linear(d_model, num_classes)
         self.bbox_embed = MLP(d_model, d_model, 4, 3)
 
-        self.refine_box = False
-
         self._reset_parameters()
 
     def _reset_parameters(self):
@@ -94,14 +93,10 @@ class Transformer(nn.Module):
         if self.spatial_prior == "learned":
             nn.init.uniform_(self.position.weight.data, 0, 1)
 
-        if self.refine_box:
-            self.class_embed = _get_clones(self.class_embed, num_pred)
-            self.bbox_embed = _get_clones(self.bbox_embed, num_pred)
-            nn.init.constant_(self.bbox_embed[0].layers[-1].bias.data[2:], -2.0)
-        else:
-            nn.init.constant_(self.bbox_embed.layers[-1].bias.data[2:], -2.0)
-            self.class_embed = nn.ModuleList([self.class_embed for _ in range(num_pred)])
-            self.bbox_embed = nn.ModuleList([self.bbox_embed for _ in range(num_pred)])
+        nn.init.constant_(self.bbox_embed.layers[-1].bias.data[2:], -2.0)
+        self.class_embed = nn.ModuleList([self.class_embed for _ in range(num_pred)])
+        self.bbox_embed = nn.ModuleList([self.bbox_embed for _ in range(num_pred)])
+
 
     def forward(self, srcs, masks):
 
@@ -163,8 +158,6 @@ class Transformer(nn.Module):
             outputs_coord = tmp.sigmoid()
             outputs_classes.append(outputs_class[None,])
             outputs_coords.append(outputs_coord[None,])
-            if self.refine_box:
-                reference_points = outputs_coord
 
         output = torch.cat(outputs_classes, dim=0), torch.cat(outputs_coords, dim=0)
 
@@ -285,9 +278,11 @@ class TransformerDecoderLayer(nn.Module):
         self.dropout2 = nn.Dropout(dropout)
         self.norm2 = nn.LayerNorm(d_model)
 
-        # self attention
-        self.self_attn_level = nn.MultiheadAttention(d_model, n_heads, dropout=dropout)
-        self.level_fc = nn.Linear(d_model * n_levels, d_model)
+
+        # level combination
+        if n_levels>1:
+            self.level_fc = nn.Linear(d_model * n_levels, d_model)
+
         # ffn
         self.ffn = FFN(d_model, d_ffn, dropout, activation)
 
