@@ -333,8 +333,8 @@ def pos2posemb1d(pos, num_pos_feats:int=256, temperature:int=10000):
 
 def mask2pos(mask):
     not_mask = ~mask
-    y_embed = not_mask[:, :, 0].cumsum(1, dtype=torch.float32)
-    x_embed = not_mask[:, 0, :].cumsum(1, dtype=torch.float32)
+    y_embed = not_mask[:, :, 0].float().cumsum(1)
+    x_embed = not_mask[:, 0, :].float().cumsum(1)
     y_embed = (y_embed - 0.5) / y_embed[:, -1:]
     x_embed = (x_embed - 0.5) / x_embed[:, -1:]
     return y_embed, x_embed
