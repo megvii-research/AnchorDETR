@@ -17,7 +17,7 @@ class data_prefetcher():
         self.loader = iter(loader)
         self.prefetch = prefetch
         self.device = device
-        if prefetch:
+        if prefetch and self.device=='cuda':
             self.stream = torch.cuda.Stream()
             self.preload()
 
@@ -50,7 +50,7 @@ class data_prefetcher():
             # else:
 
     def next(self):
-        if self.prefetch:
+        if self.prefetch and self.device=='cuda':
             torch.cuda.current_stream().wait_stream(self.stream)
             samples = self.next_samples
             targets = self.next_targets
