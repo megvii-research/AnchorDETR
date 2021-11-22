@@ -205,7 +205,7 @@ class TransformerEncoderLayerSpatial(nn.Module):
         else:
             src2 = self.self_attn((src + posemb_2d).reshape(bz, h * w, c).transpose(0, 1),
                                   (src + posemb_2d).reshape(bz, h * w, c).transpose(0, 1),
-                                  src.reshape(bz, h * w, c).transpose(0, 1))[0].transpose(0, 1).reshape(bz, h, w, c)
+                                  src.reshape(bz, h * w, c).transpose(0, 1), key_padding_mask=padding_mask.reshape(bz, h*w))[0].transpose(0, 1).reshape(bz, h, w, c)
 
         src = src + self.dropout1(src2)
         src = self.norm1(src)
@@ -318,7 +318,7 @@ class TransformerDecoderLayer(nn.Module):
         else:
             tgt2 = self.cross_attn((tgt + query_pos).repeat(l, 1, 1).transpose(0, 1),
                                    (srcs + posemb_2d).reshape(bz * l, h * w, c).transpose(0,1),
-                                   srcs.reshape(bz * l, h * w, c).transpose(0, 1))[0].transpose(0,1)
+                                   srcs.reshape(bz * l, h * w, c).transpose(0, 1), key_padding_mask=src_padding_masks.reshape(bz*l, h*w))[0].transpose(0,1)
 
         if l > 1:
             tgt2 = self.level_fc(tgt2.reshape(bz, l, tgt_len, c).permute(0, 2, 3, 1).reshape(bz, tgt_len, c * l))
