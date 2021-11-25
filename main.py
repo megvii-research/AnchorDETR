@@ -128,6 +128,14 @@ def main(args):
 
     if args.frozen_weights is not None:
         assert args.masks, "Frozen training is meant for segmentation only"
+
+    if isinstance(args.dilation,str):
+        if args.dilation.lower() == 'false':
+            args.dilation = False
+        elif args.dilation.lower() == 'true':
+            args.dilation = True
+        else:
+            raise ValueError("The dilation should be True or False")
     print(args)
 
     device = torch.device(args.device)
