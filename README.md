@@ -22,7 +22,7 @@ We also propose an attention variant RCDA to reduce the memory cost for high-res
 | SMCA               |  multi-level  |  50     |  43.7   |  152     | 10                |
 | Deformable DETR    |  multi-level  |  50     |  43.8   |  173     | 15                |
 | Conditional DETR   |  DC5          |  50     |  43.8   |  195     | 10                |
-| Anchor DETR        |  DC5          |  50     |  44.3   |  151     | 16 (19)           |
+| Anchor DETR        |  DC5          |  50     |  44.3   |  172     | 16 (19)           |
 
 
 *Note:*
