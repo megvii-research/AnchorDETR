@@ -81,7 +81,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
 
 @torch.no_grad()
-def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir):
+def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, output_dir, save_json=False):
     model.eval()
     criterion.eval()
 
@@ -90,7 +90,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
     header = 'Test:'
 
     iou_types = tuple(k for k in ('segm', 'bbox') if k in postprocessors.keys())
-    coco_evaluator = CocoEvaluator(base_ds, iou_types)
+    coco_evaluator = CocoEvaluator(base_ds, iou_types, save_json=save_json)
     # coco_evaluator.coco_eval[iou_types[0]].params.iouThrs = [0, 0.1, 0.5, 0.75]
 
     panoptic_evaluator = None
@@ -147,6 +147,13 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
         coco_evaluator.synchronize_between_processes()
     if panoptic_evaluator is not None:
         panoptic_evaluator.synchronize_between_processes()
+
+    if save_json:
+        all_res = utils.all_gather(coco_evaluator.results['bbox'])
+        results=[]
+        for p in all_res:
+            results.extend(p)
+        coco_evaluator.results['bbox'] = results
 
     # accumulate predictions from all images
     if coco_evaluator is not None:

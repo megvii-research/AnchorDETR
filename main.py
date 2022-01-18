@@ -273,9 +273,12 @@ def main(args):
     
     if args.eval:
         test_stats, coco_evaluator = evaluate(model, criterion, postprocessors,
-                                              data_loader_val, base_ds, device, args.output_dir)
+                                              data_loader_val, base_ds, device, args.output_dir, save_json=True)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
+            if utils.is_main_process():
+                with open(os.path.join(args.output_dir, 'results.json'), 'w') as f:
+                    json.dump(coco_evaluator.results['bbox'], f)
         return
 
     print("Start training")
