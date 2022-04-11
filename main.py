@@ -103,6 +103,8 @@ def get_args_parser():
 
     # dataset parameters
     parser.add_argument('--dataset_file', default='coco')
+    parser.add_argument('--eval_set', default='val', choices=['val', 'test'],
+                        type=str,help="dataset to evaluate")
     parser.add_argument('--coco_path', default='/data/coco', type=str)
     parser.add_argument('--coco_panoptic_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')
@@ -154,7 +156,7 @@ def main(args):
     print('number of params:', n_parameters)
 
     dataset_train = build_dataset(image_set='train', args=args)
-    dataset_val = build_dataset(image_set='val', args=args)
+    dataset_val = build_dataset(image_set=args.eval_set, args=args)
 
     if args.distributed:
         if args.cache_mode:
