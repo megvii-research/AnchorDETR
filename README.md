@@ -75,13 +75,14 @@ python main.py --eval --coco_path /path/to/coco --resume /path/to/checkpoint.pth
 
 If you find this project useful for your research, please consider citing the paper.
 ```
-@misc{wang2021anchor,
-      title={Anchor DETR: Query Design for Transformer-Based Detector},
-      author={Yingming Wang and Xiangyu Zhang and Tong Yang and Jian Sun},
-      year={2021},
-      eprint={2109.07107},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@inproceedings{wang2022anchor,
+  title={Anchor detr: Query design for transformer-based detector},
+  author={Wang, Yingming and Zhang, Xiangyu and Yang, Tong and Sun, Jian},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume={36},
+  number={3},
+  pages={2567--2575},
+  year={2022}
 }
 ```
 
